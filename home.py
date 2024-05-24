@@ -46,18 +46,16 @@ st.markdown(
 names = ["FIX4"]
 usernames = ["FIX4"]
 hashed_passwords = pickle.loads((drive.get("hashed_pw.pkl")).read())
-#authenticator = stauth.Authenticate(names, 
-#                                    usernames, 
-#                                    hashed_passwords, 
-#                                    "fix4_dashboard_cookie", 
-#                                    "fix4_db_key", 
-#                                    cookie_expiry_days=1)
+authenticator = stauth.Authenticate(names, 
+                                    usernames, 
+                                    hashed_passwords, 
+                                    "fix4_dashboard_cookie", 
+                                    "fix4_db_key", 
+                                    cookie_expiry_days=1)
 
-#name, authentication_status, username = authenticator.login("Login", 'main')
+name, authentication_status, username = authenticator.login("Login", 'main')
 
-#st.write(f"Authentication status: {authentication_status}")
-
-authentication_status = True
+st.write(f"Authentication status: {authentication_status}")
 
 if authentication_status == False:
     st.error("Uw gebruikersnaam of wachtwoord is onjuist.")
@@ -65,8 +63,8 @@ if authentication_status == None:
     st.warning("Voer uw gebruikersnaam en wachtwoord in.")
 if authentication_status == True:
 
-    #st.sidebar.header(f"Welkom, {name}!")
-    #authenticator.logout("Log uit", "sidebar")
+    st.sidebar.header(f"Welkom, {name}!")
+    authenticator.logout("Log uit", "sidebar")
     st.title("FIX4 - Zehnder Service Level Dashboard")
     st.sidebar.write("Dit dashboard is ontwikkeld door Bart Gerritsen, Trainee Business Analyst bij Zehnder Group Zwolle. Voor vragen met betrekking tot dit dashboard of de weergegeven data kunt u mailen naar bart.gerritsen@zehndergroup.com")
 
