@@ -330,14 +330,14 @@ if authentication_status == True:
                     fig.update_traces(xbins=dict(size=bin_size))
                     fig.update_traces(textfont_size=14, textangle=0, textposition="outside", cliponaxis=False, hovertemplate = None, name = "Aantal dagen")
                     fig.add_vline(x=sla_contact, line_dash="dash", line_color="red", line_width=2)
-                    fig.add_vline(x=sla_contact_median, line_dash="dash", line_color="blue", line_width=2)
+                    fig.add_vline(x=sla_contact_median, line_dash="dash", line_color="#009E46", line_width=2)
                     fig.add_annotation(
                         x=sla_contact_median,
                         y=max(df[(df['SL_1e_contact'].notna())]['SL_1e_contact'].value_counts()),
-                        text=f"Mediaan ({sla_contact_median} dagen)",
+                        text=f"Mediaan ({sla_contact_median} dag(en))",
                         ax=80,
                         ay=-40,
-                        bgcolor="rgb(61, 61, 63)",
+                        bgcolor="rgb(242, 242, 242)",
                         bordercolor="#009E46"
                     )
                     fig.update_layout( 
@@ -382,14 +382,14 @@ if authentication_status == True:
                     fig2.update_traces(xbins=dict(size=bin_size))
                     fig2.update_traces(textfont_size=14, textangle=0, textposition="outside", cliponaxis=False, hovertemplate = None, name = "Aantal dagen")
                     fig2.add_vline(x=sla_afspraak, line_dash="dash", line_color="red", line_width=2)
-                    fig2.add_vline(x=sla_afspraak_median, line_dash="dash", line_color="blue", line_width=2)
+                    fig2.add_vline(x=sla_afspraak_median, line_dash="dash", line_color="#009E46", line_width=2)
                     fig2.add_annotation(
                         x=sla_afspraak_median,
                         y=max(df[(df['SL_afspraakdatum'].notna())]['SL_afspraakdatum'].value_counts()),
-                        text=f"Mediaan ({sla_afspraak_median} dagen)",
+                        text=f"Mediaan ({sla_afspraak_median} dag(en))",
                         ax=80,
                         ay=-40,
-                        bgcolor="rgb(61, 61, 63)",
+                        bgcolor="rgb(242, 242, 242)",
                         bordercolor="#009E46"
                     )
                     fig2.update_layout( 
