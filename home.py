@@ -50,6 +50,8 @@ hashed_passwords = pickle.loads((drive.get("hashed_pw.pkl")).read())
 authenticator = stauth.Authenticate(names, usernames, hashed_passwords,
                                     "fix4_dashboard", "fix4_db_key", cookie_expiry_days=1)
 
+st.write(authenticator)
+
 name, authentication_status, username = authenticator.login("Login", "main")
 
 st.write(f"Authentication status: {authentication_status}")
