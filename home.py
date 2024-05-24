@@ -10,6 +10,7 @@ from deta import Deta
 #Initialize with a project key
 deta = Deta(st.secrets.deta_creds.detakey)
 drive = deta.Drive("FIX4_AUTH")
+base = deta.Base("EXTERN_LOGIN")
 
 #--- Webpagina configureren ---
 #im = Image.open("https://www.fix4.nl/assets/files/logo-fix4-web.svg")
@@ -40,9 +41,20 @@ st.markdown(
             """,
             unsafe_allow_html=True,
         )
-
+entity_select = st.sidebar.selectbox("Inloggen als", options = ['FIX4', 'Zehnder', 'Admin'], key = 'entity')
 key_input = st.sidebar.text_input("Secret key", type = 'password', key = 'pw')
-if st.secrets['credentials']["pw"] == key_input:
+
+if entity_select == 'FIX4':
+    pw = st.secrets['credentials']["pw_fix4"]
+    naam = 'FIX4'
+elif entity_select == 'Zehnder':
+    pw = st.secrets['credentials']["pw_zehnder"]
+    naam = 'Zehnder'
+elif entity_select == 'Admin':
+    pw = st.secrets['credentials']["pw_admin"]
+    naam = 'Admin'
+
+if pw == key_input:
     authentication_status = True
 elif len(key_input) == 0:
     authentication_status = None
@@ -53,10 +65,24 @@ else:
 if authentication_status == False:
     st.error("De ingevoerde Secret Key is onjuist.")
 if authentication_status == None:
-    st.info("Voer de Secret Key in de sidebar links in om verder te gaan.", icon = "🚀")
+    st.info("Specificeer de gebruiker en voer de Secret Key in de sidebar links in om verder te gaan.", icon = "🚀")
 if authentication_status == True:
 
-    st.sidebar.header(f"Welkom, FIX4!")
+    st.sidebar.header(f"Welkom, {naam}!")
+    base.put(
+        {'name': naam,
+         'last_activity': str(datetime.now())}, 
+        key = f'{naam}-{str((datetime.now()).strftime("%Y-%m-%d-%H"))}',
+        expire_in = 2592000)
+    
+    if naam == 'Admin':
+        st.subheader("Log Externe Users")
+        log_data = pd.DataFrame(base.fetch().items)
+        log_data_grouped = log_data.groupby('name').agg(
+            last_activity=('last_activity', 'max'),
+            active_hours_past_30_days=('last_activity', 'size')
+        ).reset_index()
+        st.dataframe(log_data_grouped, hide_index = True)
     
     st.title("FIX4 - Zehnder Service Level Dashboard")
     st.sidebar.write("Dit dashboard is ontwikkeld door Bart Gerritsen, Trainee Business Analyst bij Zehnder Group Zwolle. Voor vragen met betrekking tot dit dashboard of de weergegeven data kunt u mailen naar bart.gerritsen@zehndergroup.com")
