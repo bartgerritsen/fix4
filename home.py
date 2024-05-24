@@ -1,5 +1,4 @@
 import streamlit as st
-from PIL import Image
 import pickle
 from pathlib import Path
 import streamlit_authenticator as stauth
