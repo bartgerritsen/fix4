@@ -359,7 +359,7 @@ if authentication_status == True:
                     div_style_aantal = '''
                                     <style>
                                         div.stPlotlyChart {
-                                            border: 10px solid #3D3D3F;
+                                            border: 10px solid #F2F2F2;
                                             border-radius: 20px;
                                         }
                                     </style>
@@ -411,7 +411,7 @@ if authentication_status == True:
                     div_style_aantal = '''
                                     <style>
                                         div.stPlotlyChart {
-                                            border: 10px solid #3D3D3F;
+                                            border: 10px solid #F2F2F2;
                                             border-radius: 20px;
                                         }
                                     </style>
