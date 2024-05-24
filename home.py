@@ -47,7 +47,7 @@ st.markdown(
 names = ["FIX4"]
 usernames = ["FIX4"]
 hashed_passwords = (drive.get("hashed_pw.pkl")).read()
-st.write(hashed_passwords)
+
 authenticator = stauth.Authenticate(names, usernames, hashed_passwords,
                                     "fix4_dashboard", "fix4_db_key", cookie_expiry_days=1)
 
