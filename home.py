@@ -41,21 +41,17 @@ st.markdown(
             unsafe_allow_html=True,
         )
 
-#--- USER AUTHENTICATION ---
- 
 names = ["FIX4"]
 usernames = ["FIX4"]
-hashed_passwords = pickle.loads((drive.get("hashed_pw.pkl")).read())
-authenticator = stauth.Authenticate(names, 
-                                    usernames, 
-                                    hashed_passwords, 
-                                    "fix4_dashboard_cookie", 
-                                    "fix4_db_key", 
-                                    cookie_expiry_days=1)
+file_path = Path(__file__).parent / "hashed_pw.pkl"
+with file_path.open("rb") as file:
+    hashed_passwords = pickle.load(file)
 
-name, authentication_status, username = authenticator.login("Login", 'main')
+authenticator = stauth.Authenticate(names, usernames, hashed_passwords,
+                                    "fix4_dashboard_cookie", "fix4_db_key", cookie_expiry_days=1)
 
-st.write(f"Authentication status: {authentication_status}")
+name, authentication_status, username = authenticator.login("Login", "main")
+
 
 if authentication_status == False:
     st.error("Uw gebruikersnaam of wachtwoord is onjuist.")
