@@ -52,7 +52,7 @@ authenticator = stauth.Authenticate(names, usernames, hashed_passwords,
 
 name, authentication_status, username = authenticator.login("Login", 'main')
 
-st.write(name, authentication_status, username)
+st.write(authenticator.login("Login", 'main'))
 
 if authentication_status == False:
     st.error("Uw gebruikersnaam of wachtwoord is onjuist.")
