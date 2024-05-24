@@ -31,7 +31,6 @@ hide_streamlit_style = """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 st.sidebar.image("https://www.fix4.nl/assets/files/logo-fix4-web.svg", use_column_width=True)
 st.sidebar.subheader("")
-st.sidebar.write("Dit dashboard is ontwikkeld door Bart Gerritsen, Trainee Business Analyst bij Zehnder Group Zwolle. Voor vragen met betrekking tot dit dashboard of de weergegeven data kunt u mailen naar bart.gerritsen@zehndergroup.com")
 st.markdown(
             """
             <style>
@@ -54,15 +53,19 @@ authenticator = stauth.Authenticate(names, usernames, hashed_passwords,
 
 name, authentication_status, username = authenticator.login("Login", "main")
 
+st.write(f"Authentication status: {authentication_status}")
+
 if authentication_status == False:
     st.error("Uw gebruikersnaam of wachtwoord is onjuist.")
 if authentication_status == None:
-    pass
+    st.warning("Voer uw gebruikersnaam en wachtwoord in.")
 if authentication_status == True:
 
     st.sidebar.header(f"Welkom, {name}!")
     authenticator.logout("Log uit", "sidebar")
     st.title("FIX4 - Zehnder Service Level Dashboard")
+    st.sidebar.write("Dit dashboard is ontwikkeld door Bart Gerritsen, Trainee Business Analyst bij Zehnder Group Zwolle. Voor vragen met betrekking tot dit dashboard of de weergegeven data kunt u mailen naar bart.gerritsen@zehndergroup.com")
+
 
     def extract_huisnummer(adres):
         return adres.rsplit(' ', 1)[-1].upper()
