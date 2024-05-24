@@ -1,0 +1,32 @@
+[theme]
+# The preset Streamlit theme that your custom theme inherits from. One of "light" or "dark".
+base = "light"
+
+# Primary accent color for interactive elements.
+primaryColor = "#E2001A"
+
+# Background color for the main content area.
+backgroundColor = "#336B71"
+
+# Background color used for the sidebar and most interactive widgets.
+secondaryBackgroundColor = "#00464E"
+
+# Color used for almost all text.
+textColor = "#FFFFFF"
+
+# Font family for all text in the app, except code blocks. One of "sans serif", "serif", or "monospace".
+font = "sans serif"
+
+[server]
+# Automatically rerun script when the file is modified on disk.
+# Default: false
+runOnSave = true
+enableXsrfProtection = false
+enableCORS = false
+
+[browser]
+gatherUsageStats = false
+
+[client]
+showSidebarNavigation = false
+
