@@ -46,8 +46,8 @@ st.markdown(
  
 names = ["FIX4"]
 usernames = ["FIX4"]
-hashed_passwords = pickle.loads((drive.get("hashed_pw.pkl")).read())
-
+hashed_passwords = (drive.get("hashed_pw.pkl")).read()
+st.write(hashed_passwords)
 authenticator = stauth.Authenticate(names, usernames, hashed_passwords,
                                     "fix4_dashboard", "fix4_db_key", cookie_expiry_days=1)
 
@@ -65,7 +65,6 @@ if authentication_status == True:
     authenticator.logout("Log uit", "sidebar")
     st.title("FIX4 - Zehnder Service Level Dashboard")
     st.sidebar.write("Dit dashboard is ontwikkeld door Bart Gerritsen, Trainee Business Analyst bij Zehnder Group Zwolle. Voor vragen met betrekking tot dit dashboard of de weergegeven data kunt u mailen naar bart.gerritsen@zehndergroup.com")
-
 
     def extract_huisnummer(adres):
         return adres.rsplit(' ', 1)[-1].upper()
