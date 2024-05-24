@@ -47,8 +47,12 @@ names = ["FIX4"]
 usernames = ["FIX4"]
 hashed_passwords = pickle.loads((drive.get("hashed_pw.pkl")).read())
 
-authenticator = stauth.Authenticate(names, usernames, hashed_passwords,
-                                    "fix4_dashboard", "fix4_db_key", cookie_expiry_days=1)
+try:
+    authenticator = stauth.Authenticate(names, usernames, hashed_passwords,
+                                        "fix4_dashboard", "fix4_db_key", cookie_expiry_days=1)
+    st.write("Authenticator initialized.")
+except Exception as e:
+    st.error(f"Error initializing authenticator: {e}")
 
 name, authentication_status, username = authenticator.login("Login", 'main')
 
