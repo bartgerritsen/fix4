@@ -338,7 +338,7 @@ if authentication_status == True:
                         ax=80,
                         ay=-40,
                         bgcolor="rgb(61, 61, 63)",
-                        bordercolor="blue"
+                        bordercolor="#009E46"
                     )
                     fig.update_layout( 
                                         xaxis_tickangle=-50,
@@ -390,7 +390,7 @@ if authentication_status == True:
                         ax=80,
                         ay=-40,
                         bgcolor="rgb(61, 61, 63)",
-                        bordercolor="blue"
+                        bordercolor="#009E46"
                     )
                     fig2.update_layout( 
                                         xaxis_tickangle=-50,
