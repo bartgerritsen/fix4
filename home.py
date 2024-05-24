@@ -13,11 +13,11 @@ deta = Deta(st.secrets.deta_creds.detakey)
 drive = deta.Drive("FIX4_AUTH")
 
 #--- Webpagina configureren ---
-im = Image.open("images/Zehnder logo nieuw.jpg")
+#im = Image.open("https://www.fix4.nl/assets/files/logo-fix4-web.svg")
 
 st.set_page_config(
     page_title="FIX4 Service Level Dashboard", 
-    page_icon = im,
+    page_icon = "https://www.fix4.nl/assets/files/logo-fix4-web.svg",
     layout = 'wide',
     initial_sidebar_state= "expanded"
 )
@@ -29,7 +29,7 @@ hide_streamlit_style = """
             </style>
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-st.sidebar.image("images\Zehnder logo nieuw.jpg", use_column_width=True)
+st.sidebar.image("https://www.fix4.nl/assets/files/logo-fix4-web.svg", use_column_width=True)
 st.sidebar.subheader("")
 st.sidebar.write("Dit dashboard is ontwikkeld door Bart Gerritsen, Trainee Business Analyst bij Zehnder Group Zwolle. Voor vragen met betrekking tot dit dashboard of de weergegeven data kunt u mailen naar bart.gerritsen@zehndergroup.com")
 st.markdown(
@@ -64,7 +64,7 @@ if authentication_status == True:
 
     st.sidebar.header(f"Welkom, {name}!")
     authenticator.logout("Log uit", "sidebar")
-    st.title("🔨 FIX4 Dashboard")
+    st.title("FIX4 - Zehnder Service Level Dashboard")
 
     def extract_huisnummer(adres):
         return adres.rsplit(' ', 1)[-1].upper()
@@ -316,7 +316,7 @@ if authentication_status == True:
                         text=f"Mediaan ({sla_contact_median} dagen)",
                         ax=80,
                         ay=-40,
-                        bgcolor="rgb(0, 70, 78)",
+                        bgcolor="rgb(61, 61, 63)",
                         bordercolor="blue"
                     )
                     fig.update_layout( 
@@ -328,8 +328,8 @@ if authentication_status == True:
                                         height=400,
                                         uniformtext_minsize = 12,
                                         uniformtext_mode = 'hide',
-                                        plot_bgcolor='#00464E', 
-                                        paper_bgcolor='#00464E',
+                                        plot_bgcolor='#3D3D3F', 
+                                        paper_bgcolor='#3D3D3F',
                                         hovermode = "x unified",
                                         hoverlabel_font_size = 20,
                                         hoverlabel = dict(namelength = -1),
@@ -338,7 +338,7 @@ if authentication_status == True:
                     div_style_aantal = '''
                                     <style>
                                         div.stPlotlyChart {
-                                            border: 10px solid #00464E;
+                                            border: 10px solid #3D3D3F;
                                             border-radius: 20px;
                                         }
                                     </style>
@@ -368,7 +368,7 @@ if authentication_status == True:
                         text=f"Mediaan ({sla_afspraak_median} dagen)",
                         ax=80,
                         ay=-40,
-                        bgcolor="rgb(0, 70, 78)",
+                        bgcolor="rgb(61, 61, 63)",
                         bordercolor="blue"
                     )
                     fig2.update_layout( 
@@ -380,8 +380,8 @@ if authentication_status == True:
                                         height=400,
                                         uniformtext_minsize = 12,
                                         uniformtext_mode = 'hide',
-                                        plot_bgcolor='#00464E', 
-                                        paper_bgcolor='#00464E',
+                                        plot_bgcolor='#3D3D3F', 
+                                        paper_bgcolor='#3D3D3F',
                                         hovermode = "x unified",
                                         hoverlabel_font_size = 20,
                                         hoverlabel = dict(namelength = -1),
@@ -390,7 +390,7 @@ if authentication_status == True:
                     div_style_aantal = '''
                                     <style>
                                         div.stPlotlyChart {
-                                            border: 10px solid #00464E;
+                                            border: 10px solid #3D3D3F;
                                             border-radius: 20px;
                                         }
                                     </style>
