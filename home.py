@@ -1,19 +1,13 @@
 import streamlit as st
-import pickle
-from pathlib import Path
 import streamlit_authenticator as stauth
 import pandas as pd
 from datetime import datetime
 import plotly.express as px
 from deta import Deta
 
-#Initialize with a project key
 deta = Deta(st.secrets.deta_creds.detakey)
 drive = deta.Drive("FIX4_AUTH")
 base = deta.Base("EXTERN_LOGIN")
-
-#--- Webpagina configureren ---
-#im = Image.open("https://www.fix4.nl/assets/files/logo-fix4-web.svg")
 
 st.set_page_config(
     page_title="FIX4 Service Level Dashboard", 
@@ -60,7 +54,6 @@ elif len(key_input) == 0:
     authentication_status = None
 else:
     authentication_status = False
-
 
 if authentication_status == False:
     st.error("De ingevoerde Secret Key is onjuist.")
