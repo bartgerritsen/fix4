@@ -47,9 +47,7 @@ st.markdown(
  
 names = ["FIX4"]
 usernames = ["FIX4"]
-file_path = Path(__file__).parent / "hashed_pw.pkl"
-with file_path.open("rb") as file:
-    hashed_passwords = pickle.load(file)
+hashed_passwords = pickle.loads((drive.get("hashed_pw.pkl")).read())
 
 authenticator = stauth.Authenticate(names, usernames, hashed_passwords,
                                     "fix4_dashboard", "fix4_db_key", cookie_expiry_days=1)
