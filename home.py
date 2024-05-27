@@ -67,6 +67,9 @@ if authentication_status == True:
          'last_activity': str(datetime.now())}, 
         key = f'{naam}-{str((datetime.now()).strftime("%Y-%m-%d-%H"))}',
         expire_in = 2592000)
+
+    if st.button(f"Refresh", type = 'primary', help = "Klik hier om de pagina te refreshen"):
+        st.cache_data.clear()
     
     if naam == 'Admin':
         st.subheader("Log Externe Users")
