@@ -310,6 +310,7 @@ if authentication_status == True:
         tab1.dataframe(df.sort_values('Uitzetdatum', ascending = False), hide_index = True, use_container_width= True)
         with tab2:
             df = df[df['Status']!='Vervallen']
+            
             @st.fragment
             def sla_chart(df):
                 with st.popover("Grafiekinstellingen"):
