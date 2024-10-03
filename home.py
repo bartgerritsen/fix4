@@ -1,13 +1,10 @@
 import streamlit as st
-import streamlit_authenticator as stauth
 import pandas as pd
 from datetime import datetime
 import plotly.express as px
-from deta import Deta
+from supabase import create_client
+from io import StringIO
 
-deta = Deta(st.secrets.deta_creds.detakey)
-drive = deta.Drive("FIX4_AUTH")
-base = deta.Base("EXTERN_LOGIN")
 
 st.set_page_config(
     page_title="FIX4 Service Level Dashboard", 
@@ -61,19 +58,26 @@ if authentication_status == None:
     st.info("Specificeer de gebruiker en voer de Secret Key in de sidebar links in om verder te gaan.", icon = "🚀")
 if authentication_status == True:
 
+    url = st.secrets.supabase_creds.url
+    key = st.secrets.supabase_creds.key
+    supabase = create_client(url, key)
+    bucket_name = "fix4"
+
     st.sidebar.header(f"Welkom, {naam}!")
-    base.put(
-        {'name': naam,
-         'last_activity': str(datetime.now())}, 
-        key = f'{naam}-{str((datetime.now()).strftime("%Y-%m-%d-%H"))}',
-        expire_in = 2592000)
+    data = {'name': naam,
+            'last_activity': str(datetime.now()),
+            'key': f'{naam}-{str((datetime.now()).strftime("%Y-%m-%d-%H"))}'
+    }
+    
+    supabase.table('EXTERN_LOGIN').upsert(data).execute()
 
     if st.button(f"Refresh", type = 'primary', help = "Klik hier om de pagina te refreshen"):
         st.cache_data.clear()
     
     if naam == 'Admin':
         st.subheader("Log Externe Users")
-        log_data = pd.DataFrame(base.fetch().items)
+        log_data = pd.DataFrame((supabase.table('EXTERN_LOGIN').select("*").execute()).data)
+        log_data['last_activity'] = pd.to_datetime(log_data['last_activity']).dt.strftime('%d-%m-%Y %H:%M:%S')
         log_data_grouped = log_data.groupby('name').agg(
             last_activity=('last_activity', 'max'),
             active_hours_past_30_days=('last_activity', 'size')
@@ -91,8 +95,11 @@ if authentication_status == True:
         werkdagen = [dag for dag in dagen if dag.weekday() < 5]  # Filter weekenden en feestdagen
         return len(werkdagen)
     
-    file1 = drive.get("fix4_dashboard.csv")
-    file2 = drive.get("adressen.csv")
+    file1_bytes = supabase.storage.from_(bucket_name).download("fix4_dashboard.csv")
+    file2_bytes = supabase.storage.from_(bucket_name).download("adressen.csv")
+
+    file1 = StringIO(file1_bytes.decode('utf-8'))
+    file2 = StringIO(file2_bytes.decode('utf-8'))
 
     @st.cache_data(show_spinner = "Data ophalen...")
     def fix4_data_ophalen(_pad, _pad2):
@@ -302,7 +309,8 @@ if authentication_status == True:
         tab1, tab2 = st.tabs(['Data', 'Grafieken'])
         tab1.dataframe(df.sort_values('Uitzetdatum', ascending = False), hide_index = True, use_container_width= True)
         with tab2:
-            @st.experimental_fragment
+            df = df[df['Status']!='Vervallen']
+            @st.fragment
             def sla_chart(df):
                 with st.popover("Grafiekinstellingen"):
                     bin_size = st.number_input("Aantal dagen per staaf", min_value = 1, max_value = 10, step = 1, value = 1, help = "Hiermee selecteer je hoeveel dagen in het interval van één staaf weergegeven worden.")
