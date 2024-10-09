@@ -4,6 +4,7 @@ from datetime import datetime
 import plotly.express as px
 from supabase import create_client
 from io import StringIO
+import pydeck as pdk
 
 
 st.set_page_config(
@@ -301,10 +302,52 @@ if authentication_status == True:
                     st.rerun()
 
         
-        if df[~((df['latitude'].isna())|(df['longitude'].isna()))].shape[0] == 0:
-            st.info("Geen locatiegegevens voor geselecteerde service orders gevonden", icon = "📍")
-        else:
-            st.map(df[~((df['latitude'].isna())|(df['longitude'].isna()))], latitude = df['latitude'], longitude = df['longitude'],size = 25, use_container_width=True)
+        @st.fragment()
+        def display_map(df):
+            if "map_selections" in st.session_state:
+                selected_objects = st.session_state["map_selections"]['selection']['objects']
+                if selected_objects:
+                    for key, value in selected_objects.items():
+                        if isinstance(value, list) and len(value) > 0:
+                            referentie_filter = value[0].get("Referentie")  # Verkrijg de referentie van de eerste item in de lijst
+                            so_nummer_filter = value[0].get("SO-nummer")
+                            df = df[(df['SO-nummer']==so_nummer_filter)&(df['Referentie']==referentie_filter)]
+                            st.dataframe(df, hide_index = True, key = 'map_filtered_df', use_container_width=True)
+                            scat_rad = 1250
+                            break  # Stop de loop als we de referentie hebben gevonden
+                    if st.button("Annuleer kaart-selectie", key = 'deselect_map', use_container_width=True):
+                        del st.session_state['map_selections']
+                        scat_rad = 200
+                else:
+                    scat_rad = 200
+            else:
+                scat_rad = 200
+
+            if df[~((df['latitude'].isna())|(df['longitude'].isna()))].shape[0] == 0:
+                st.info("Geen locatiegegevens voor geselecteerde service orders gevonden", icon = "📍")
+            else:
+                map_selections = st.pydeck_chart(
+                    pdk.Deck(
+                        map_style = None,
+                        initial_view_state = pdk.ViewState(
+                            latitude = 52.1004,
+                            longitude = 5.6226,
+                            zoom = 6,
+                            
+                        ),
+                        layers = [
+                            pdk.Layer(
+                                "ScatterplotLayer",
+                                data = df[~((df['latitude'].isna())|(df['longitude'].isna()))][['longitude', 'latitude', 'Referentie', 'SO-nummer', 'Adres', 'Unit', 'Werkzaamheden', 'Status']],
+                                get_position = "[longitude, latitude]",
+                                get_color = "[200, 30, 0, 160]",
+                                get_radius = scat_rad,
+                            ),
+                        ], tooltip = {"text": "Referentie: {Referentie}\nSO-nummer: {SO-nummer}\nAdres: {Adres}\nUnit: {Unit}\nWerkzaamheden: {Werkzaamheden}\nStatus: {Status}"}
+                    ), on_select="rerun", key = 'map_selections'
+                )
+            
+        display_map(df)
             
         tab1, tab2 = st.tabs(['Data', 'Grafieken'])
         tab1.dataframe(df.sort_values('Uitzetdatum', ascending = False), hide_index = True, use_container_width= True)
