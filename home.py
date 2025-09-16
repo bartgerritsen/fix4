@@ -22,7 +22,7 @@ hide_streamlit_style = """
             </style>
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-st.sidebar.image("https://www.fix4.nl/assets/files/logo-fix4-web.svg", use_container_width=True)
+st.sidebar.image("https://www.fix4.nl/assets/files/logo-fix4-web.svg", width='stretch')
 st.sidebar.subheader("")
 st.markdown(
             """
@@ -195,7 +195,7 @@ if authentication_status == True:
     
     df = fix4_data_ophalen(file1, file2)
         
-    with st.popover("Filter", use_container_width=True, help = "Klik hier om de data te filteren"):
+    with st.popover("Filter", width = 'stretch', help = "Klik hier om de data te filteren"):
         with st.form("filter"):
             werkzaamheden = st.multiselect("Werkzaamheden", sorted(df['Werkzaamheden'].astype(str).unique()), placeholder = "Werkzaamheden...")
             if bool(werkzaamheden):
@@ -242,7 +242,7 @@ if authentication_status == True:
             else:
                 x = 1
             
-            st.form_submit_button("Bevestigen", type = 'primary', use_container_width= True)
+            st.form_submit_button("Bevestigen", type = 'primary', width = 'stretch')
     alles = df.shape[0]
     openstaand = df[df['Status']=='Openstaand'].shape[0]
     inplannen = df[df['Status']=='Inplannen'].shape[0]
@@ -283,7 +283,7 @@ if authentication_status == True:
                     button = "Geselecteerd ✅"
                 else:
                     button = "Selecteer"
-                if st.button(button, key = "total", use_container_width=True):
+                if st.button(button, key = "total", width = 'stretch'):
                     st.session_state['filter_value'] = 'total'
                     st.rerun()
         with m2:
@@ -293,7 +293,7 @@ if authentication_status == True:
                     button = "Geselecteerd ✅"
                 else:
                     button = "Selecteer"
-                if st.button(button, key = "openstaand",  use_container_width=True):
+                if st.button(button, key = "openstaand",  width = 'stretch'):
                     st.session_state['filter_value'] = 'openstaand'
                     st.rerun()
                 
@@ -304,7 +304,7 @@ if authentication_status == True:
                     button = "Geselecteerd ✅"
                 else:
                     button = "Selecteer"
-                if st.button(button, key = "inplannen",  use_container_width=True):
+                if st.button(button, key = "inplannen",  width = 'stretch'):
                     st.session_state['filter_value'] = 'inplannen'
                     st.rerun()
         with m4:
@@ -314,7 +314,7 @@ if authentication_status == True:
                     button = "Geselecteerd ✅"
                 else:
                     button = "Selecteer"
-                if st.button(button, key = "gepland",  use_container_width=True):
+                if st.button(button, key = "gepland",  width = 'stretch'):
                     st.session_state['filter_value'] = 'gepland'
                     st.rerun()
         with m5:
@@ -324,7 +324,7 @@ if authentication_status == True:
                     button = "Geselecteerd ✅"
                 else:
                     button = "Selecteer"
-                if st.button(button, key = "wachten_op_afronding",  use_container_width=True):
+                if st.button(button, key = "wachten_op_afronding",  width = 'stretch'):
                     st.session_state['filter_value'] = 'wachten_op_afronding'
                     st.rerun()
         with m6:
@@ -334,7 +334,7 @@ if authentication_status == True:
                     button = "Geselecteerd ✅"
                 else:
                     button = "Selecteer"
-                if st.button(button, key = "afgerond",  use_container_width=True):
+                if st.button(button, key = "afgerond",  width = 'stretch'):
                     st.session_state['filter_value'] = 'afgerond'
                     st.rerun()
         with m7:
@@ -344,7 +344,7 @@ if authentication_status == True:
                     button = "Geselecteerd ✅"
                 else:
                     button = "Selecteer"
-                if st.button(button, key = "vervallen",  use_container_width=True):
+                if st.button(button, key = "vervallen",  width = 'stretch'):
                     st.session_state['filter_value'] = 'vervallen'
                     st.rerun()
 
@@ -359,10 +359,10 @@ if authentication_status == True:
                             referentie_filter = value[0].get("Referentie")  # Verkrijg de referentie van de eerste item in de lijst
                             so_nummer_filter = value[0].get("SO-nummer")
                             df = df[(df['SO-nummer']==so_nummer_filter)&(df['Referentie']==referentie_filter)]
-                            st.dataframe(df, hide_index = True, key = 'map_filtered_df', use_container_width=True)
+                            st.dataframe(df, hide_index = True, key = 'map_filtered_df', width = 'stretch')
                             scat_rad = 50
                             break  # Stop de loop als we de referentie hebben gevonden
-                    if st.button("Annuleer kaart-selectie", key = 'deselect_map', use_container_width=True):
+                    if st.button("Annuleer kaart-selectie", key = 'deselect_map', width = 'stretch'):
                         del st.session_state['map_selections']
                         scat_rad = 20
                 else:
@@ -398,7 +398,7 @@ if authentication_status == True:
         display_map(df)
             
         tab1, tab2 = st.tabs(['Data', 'Grafieken'])
-        tab1.dataframe(df.sort_values('Uitzetdatum', ascending = False), hide_index = True, use_container_width= True)
+        tab1.dataframe(df.sort_values('Uitzetdatum', ascending = False), hide_index = True, width = 'stretch')
         with tab2:
             df = df[df['Status']!='Vervallen']
             
@@ -461,7 +461,7 @@ if authentication_status == True:
                                     </style>
                                     '''
                                     
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width = 'stretch')
                     st.markdown(div_style_aantal, unsafe_allow_html=True)
                 else:
                     st.info('Te weinig data beschikbaar om grafiek "Frequentie van aantal dagen tussen uitzetdatum en eerste contactmoment" te plotten', icon = "❗")
@@ -514,7 +514,7 @@ if authentication_status == True:
                                     </style>
                                     '''
                                     
-                    st.plotly_chart(fig2, use_container_width=True)
+                    st.plotly_chart(fig2, width = 'stretch')
                     st.markdown(div_style_aantal, unsafe_allow_html=True)
                 else:
                     st.info('Te weinig data beschikbaar om grafiek "Frequentie van aantal dagen tussen eerste contactmoment en afspraakdatum" te plotten', icon = "❗")
