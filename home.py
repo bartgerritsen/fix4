@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from datetime import datetime
+from datetime import datetime, date, timedelta
 import plotly.express as px
 from supabase import create_client
 from io import StringIO
@@ -222,13 +222,24 @@ if authentication_status == True:
             if bool(provincie):    
                 df = df[df['Provincie'].isin(provincie)]
             
+            if date.today() < date(2025, 9, 1):
+                st.info("Nieuw! Met behulp van 'Choose a date range' kun je snel een datuminterval selecteren. Probeer het hieronder uit!", icon = "🚀")
             if not df.shape[0] == 0:
-                min_datum = st.date_input("min. datum", value = df['Uitzetdatum'].min(), min_value = df['Uitzetdatum'].min(), max_value = df['Uitzetdatum'].max(), format = 'DD-MM-YYYY')
-                if bool(min_datum):
-                    df = df[(df['Uitzetdatum']>=min_datum)]
-                max_datum = st.date_input("max. datum", value = df['Uitzetdatum'].max(), min_value = df['Uitzetdatum'].min(), max_value = df['Uitzetdatum'].max(), format = 'DD-MM-YYYY')
-                if bool(max_datum):
-                    df = df[(df['Uitzetdatum']<=max_datum)]
+                s = pd.to_datetime(df['Uitzetdatum'], errors='coerce')
+
+                smin, smax = s.min(), s.max()
+                min_date = smin.date() if pd.notna(smin) else datetime.date.today()
+                max_date = (max(smax.date(), date.today()) + timedelta(days = 1)) if pd.notna(smax) else date.today()  # cap op vandaag
+
+                if min_date > max_date:
+                    min_date = max_date
+
+                datum_select = st.date_input("min. datum", value = [min_date, max_date], min_value = min_date, max_value = max_date, format = 'DD-MM-YYYY')
+                if datum_select != (min_date, max_date):
+                    df = df[
+                        (df['Uitzetdatum'] >= datum_select[0]) &
+                        (df['Uitzetdatum'] <= datum_select[1])
+                    ]
                 x = 0
             else:
                 x = 1
