@@ -222,8 +222,6 @@ if authentication_status == True:
             if bool(provincie):    
                 df = df[df['Provincie'].isin(provincie)]
             
-            if date.today() < date(2025, 9, 1):
-                st.info("Nieuw! Met behulp van 'Choose a date range' kun je snel een datuminterval selecteren. Probeer het hieronder uit!", icon = "🚀")
             if not df.shape[0] == 0:
                 s = pd.to_datetime(df['Uitzetdatum'], errors='coerce')
 
@@ -234,7 +232,7 @@ if authentication_status == True:
                 if min_date > max_date:
                     min_date = max_date
 
-                datum_select = st.date_input("min. datum", value = [min_date, max_date], min_value = min_date, max_value = max_date, format = 'DD-MM-YYYY')
+                datum_select = st.date_input("select date range", value = [min_date, max_date], min_value = min_date, max_value = max_date, format = 'DD-MM-YYYY')
                 if datum_select != (min_date, max_date):
                     df = df[
                         (df['Uitzetdatum'] >= datum_select[0]) &
