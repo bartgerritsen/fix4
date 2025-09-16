@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 from datetime import datetime
 import plotly.express as px
 from supabase import create_client
@@ -85,7 +86,8 @@ if authentication_status == True:
         ).reset_index()
         st.dataframe(log_data_grouped, hide_index = True)
     
-    st.title("FIX4 - Zehnder Service Level Dashboard")
+    st.markdown('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,100,0,0"/>', unsafe_allow_html=True)
+    st.markdown("""<div style="display: flex; align-items: center;"><span class="material-symbols-outlined" style="font-size:48px; margin-right:15px;">engineering</span><h1 style="margin: 0;">FIX4 - Zehnder Service Level Dashboard</h1></div>""",unsafe_allow_html=True)
     st.sidebar.write("Dit dashboard is ontwikkeld door Bart Gerritsen, Trainee Business Analyst bij Zehnder Group Zwolle. Voor vragen met betrekking tot dit dashboard of de weergegeven data kunt u mailen naar bart.gerritsen@zehndergroup.com")
 
     def extract_huisnummer(adres):
@@ -101,6 +103,69 @@ if authentication_status == True:
 
     file1 = StringIO(file1_bytes.decode('utf-8'))
     file2 = StringIO(file2_bytes.decode('utf-8'))
+
+    def bepaal_status(row):
+        if row['Administratieve Fase'] == 'Actief':
+            if pd.isnull(row['Afspraakdatum']) and pd.isnull(row['1e Contactpoging']):
+                return 'Openstaand'
+            elif row['1e Contactpoging'] and pd.isnull(row['Afspraakdatum']) and row['Status Fase'] == 'Aanmaak':
+                return 'Inplannen'
+            elif row['Afspraakdatum'] and row['Afspraakdatum'].weekday() >= 5 and row['Status Fase'] == 'Aanmaak':
+                return 'Inplannen'
+            elif row['Afspraakdatum'] and row['Afspraakdatum'] > datetime.now().date() and row['Status Fase'] in ['Aanmaak', 'In uitvoering']:
+                return 'Gepland'
+            elif row['Afspraakdatum'] and row['Afspraakdatum'] == datetime.now().date() and row['Status Fase'] in ['Aanmaak', 'In uitvoering']:
+                return 'In uitvoering'
+            elif row['Status Fase'] == 'Uitgevoerd':
+                return 'Afgerond'
+            elif row['Afspraakdatum'] < datetime.now().date() and row['Status Fase'] in ['Aanmaak', 'In uitvoering']:
+                return 'Wachten op afronding'
+        elif row['Administratieve Fase'] == 'Vervallen':
+            return 'Vervallen'
+        else:
+            return 'Onbekend'
+
+    def add_sl_columns(df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Voeg kolommen SL_1e_contact en SL_afspraakdatum toe aan df,
+        berekend met numpy.busday_count en met pandas Int64 dtype voor missing values.
+        """
+        # 1) Datumkolommen als datetime (NaT bij ongeldige waarden)
+        df = df.copy()
+        df['Uitzetdatum']       = pd.to_datetime(df['Uitzetdatum'],       errors='coerce')
+        df['1e Contactpoging']  = pd.to_datetime(df['1e Contactpoging'],  errors='coerce')
+        df['Afspraakdatum']     = pd.to_datetime(df['Afspraakdatum'],     errors='coerce')
+
+        # 2) Omzetten naar datetime64[D] arrays
+        start1 = df['Uitzetdatum'].to_numpy(dtype='datetime64[D]')
+        end1   = df['1e Contactpoging'].to_numpy(dtype='datetime64[D]')
+        start2 = df['1e Contactpoging'].to_numpy(dtype='datetime64[D]')
+        end2   = df['Afspraakdatum'].to_numpy(dtype='datetime64[D]')
+
+        # 3) Masks bepalen
+        mask1 = df['Uitzetdatum'].notna() & df['1e Contactpoging'].notna() & (start1 <= end1)
+        mask2 = df['1e Contactpoging'].notna() & df['Afspraakdatum'].notna()    & (start2 <= end2)
+
+        # 4) Busday counts berekenen
+        wb1 = np.busday_count(start1[mask1], end1[mask1]) 
+        wb2 = np.busday_count(start2[mask2], end2[mask2]) 
+
+        # 5) Series met Int64 dtype maken en vullen
+        result1 = pd.Series(pd.NA, index=df.index, dtype="Int64")
+        result1.loc[mask1] = wb1
+
+        result2 = pd.Series(pd.NA, index=df.index, dtype="Int64")
+        result2.loc[mask2] = wb2
+
+        # 6) Toevoegen aan DataFrame
+        df['SL_1e_contact']    = result1
+        df['SL_afspraakdatum'] = result2
+
+        # 7) gebruikte datetimes omzetten naar datums
+        df['1e Contactpoging'] = df['1e Contactpoging'].dt.date
+        df['Uitzetdatum'] = df['Uitzetdatum'].dt.date
+        df['Afspraakdatum'] = df['Afspraakdatum'].dt.date
+        return df
 
     @st.cache_data(show_spinner = "Data ophalen...")
     def fix4_data_ophalen(_pad, _pad2):
@@ -124,39 +189,12 @@ if authentication_status == True:
         for column in columns_to_strip:
             df[column] = df[column].str.strip()
         df['Werkzaamheden'] = df['Werkzaamheden'].str.lower().fillna("onbekend")
+        df = add_sl_columns(df)
+        df['Status'] = df.apply(bepaal_status, axis=1)
         return df
+    
     df = fix4_data_ophalen(file1, file2)
-
-    df['SL_1e_contact'] = df.apply(lambda row: werkdagen_tussen(row['Uitzetdatum'], row['1e Contactpoging'])-1 
-                            if pd.notnull(row['Uitzetdatum']) and pd.notnull(row['1e Contactpoging']) and row['Uitzetdatum']<=row['1e Contactpoging'] else None, axis=1)
-    df['SL_afspraakdatum'] = df.apply(lambda row: werkdagen_tussen(row['1e Contactpoging'], row['Afspraakdatum'])-1 
-                            if pd.notnull(row['1e Contactpoging']) and pd.notnull(row['Afspraakdatum']) and row['1e Contactpoging']<=row['Afspraakdatum'] else None, axis=1)
-    def bepaal_status(row):
-        if row['Administratieve Fase'] == 'Actief':
-            if pd.isnull(row['Afspraakdatum']) and pd.isnull(row['1e Contactpoging']):
-                return 'Openstaand'
-            elif row['1e Contactpoging'] and pd.isnull(row['Afspraakdatum']) and row['Status Fase'] == 'Aanmaak':
-                return 'Inplannen'
-            elif row['Afspraakdatum'] and row['Afspraakdatum'].weekday() >= 5 and row['Status Fase'] == 'Aanmaak':
-                return 'Inplannen'
-            elif row['Afspraakdatum'] and row['Afspraakdatum'] > datetime.now().date() and row['Status Fase'] in ['Aanmaak', 'In uitvoering']:
-                return 'Gepland'
-            elif row['Afspraakdatum'] and row['Afspraakdatum'] == datetime.now().date() and row['Status Fase'] in ['Aanmaak', 'In uitvoering']:
-                return 'In uitvoering'
-            elif row['Status Fase'] == 'Uitgevoerd':
-                return 'Afgerond'
-            elif row['Afspraakdatum'] < datetime.now().date() and row['Status Fase'] in ['Aanmaak', 'In uitvoering']:
-                return 'Wachten op afronding'
-        elif row['Administratieve Fase'] == 'Vervallen':
-            return 'Vervallen'
-        else:
-            return 'Onbekend'
         
-    # Toepassen van de functie op elke rij in de dataframe
-    df['Status'] = df.apply(bepaal_status, axis=1)
-
-
-
     with st.popover("Filter", use_container_width=True, help = "Klik hier om de data te filteren"):
         with st.form("filter"):
             werkzaamheden = st.multiselect("Werkzaamheden", sorted(df['Werkzaamheden'].astype(str).unique()), placeholder = "Werkzaamheden...")
@@ -204,6 +242,7 @@ if authentication_status == True:
     afgerond = df[df['Status']=='Afgerond'].shape[0]
     wachten_op_afronding = df[df['Status']=='Wachten op afronding'].shape[0]
     vervallen = df[df['Status']=='Vervallen'].shape[0]
+
     if 'filter_value' not in st.session_state:
         st.session_state['filter_value'] = 'total'
     elif st.session_state['filter_value'] == 'openstaand':
@@ -227,8 +266,7 @@ if authentication_status == True:
     else:
         m1,m2,m3,m4,m5,m6,m7 = st.columns(7)
         
-        
-        filter_url = "http://172.23.1.182:8501/Fix4"
+    
         with m1:
             with st.container(border = True):
                 st.metric("Alle service orders", value = alles)
@@ -313,15 +351,15 @@ if authentication_status == True:
                             so_nummer_filter = value[0].get("SO-nummer")
                             df = df[(df['SO-nummer']==so_nummer_filter)&(df['Referentie']==referentie_filter)]
                             st.dataframe(df, hide_index = True, key = 'map_filtered_df', use_container_width=True)
-                            scat_rad = 1250
+                            scat_rad = 50
                             break  # Stop de loop als we de referentie hebben gevonden
                     if st.button("Annuleer kaart-selectie", key = 'deselect_map', use_container_width=True):
                         del st.session_state['map_selections']
-                        scat_rad = 200
+                        scat_rad = 20
                 else:
-                    scat_rad = 200
+                    scat_rad = 20
             else:
-                scat_rad = 200
+                scat_rad = 20
 
             if df[~((df['latitude'].isna())|(df['longitude'].isna()))].shape[0] == 0:
                 st.info("Geen locatiegegevens voor geselecteerde service orders gevonden", icon = "📍")
@@ -342,6 +380,7 @@ if authentication_status == True:
                                 get_position = "[longitude, latitude]",
                                 get_color = "[200, 30, 0, 160]",
                                 get_radius = scat_rad,
+                                radiusMinPixels = 2
                             ),
                         ], tooltip = {"text": "Referentie: {Referentie}\nSO-nummer: {SO-nummer}\nAdres: {Adres}\nUnit: {Unit}\nWerkzaamheden: {Werkzaamheden}\nStatus: {Status}"}
                     ), on_select="rerun", key = 'map_selections'
@@ -417,6 +456,7 @@ if authentication_status == True:
                     st.markdown(div_style_aantal, unsafe_allow_html=True)
                 else:
                     st.info('Te weinig data beschikbaar om grafiek "Frequentie van aantal dagen tussen uitzetdatum en eerste contactmoment" te plotten', icon = "❗")
+                
                 if df[(df['SL_afspraakdatum'].notna())].shape[0] > 0:
                     binnen_sla_afspraak_abs = df[(df['SL_afspraakdatum']<=sla_afspraak) & (df['SL_afspraakdatum'].notna())].shape[0]
                     binnen_sla_afspraak = round((binnen_sla_afspraak_abs / df[(df['SL_afspraakdatum'].notna())].shape[0])*100, 2)
