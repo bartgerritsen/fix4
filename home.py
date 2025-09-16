@@ -88,7 +88,7 @@ if authentication_status == True:
     
     st.markdown('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,100,0,0"/>', unsafe_allow_html=True)
     st.markdown("""<div style="display: flex; align-items: center;"><span class="material-symbols-outlined" style="font-size:48px; margin-right:15px;">engineering</span><h1 style="margin: 0;">FIX4 - Zehnder Service Level Dashboard</h1></div>""",unsafe_allow_html=True)
-    st.sidebar.write("Dit dashboard is ontwikkeld door Bart Gerritsen, Trainee Business Analyst bij Zehnder Group Zwolle. Voor vragen met betrekking tot dit dashboard of de weergegeven data kunt u mailen naar bart.gerritsen@zehndergroup.com")
+    st.sidebar.write("Vragen? mail naar bart.gerritsen@zehndergroup.com")
 
     def extract_huisnummer(adres):
         return adres.rsplit(' ', 1)[-1].upper()
