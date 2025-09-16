@@ -22,7 +22,7 @@ hide_streamlit_style = """
             </style>
             """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-st.sidebar.image("https://www.fix4.nl/assets/files/logo-fix4-web.svg", use_column_width=True)
+st.sidebar.image("https://www.fix4.nl/assets/files/logo-fix4-web.svg", use_container_width=True)
 st.sidebar.subheader("")
 st.markdown(
             """
